@@ -8,7 +8,7 @@ let config = {
     apiUrl: 'http://www.themealdb.com/api/json/v1/',
     apiKey: process.env.KEY || '1',
     url: () => `${config.apiUrl}${config.apiKey}`,
-    elasticUrl: 'http://localhost:9200/'
+    elasticUrl: 'http://localhost:9200/meals/'
 }
 
 // returns promise with all Categories in data property
@@ -40,11 +40,13 @@ function transformMeal(meal) {
     }
 }
 
+function loadMealFromId(id) {
+    return axios.get(`${config.url()}/lookup.php?i=${id}`)
+}
+
 function loadIds() {
     return new Promise((resolve, reject) => {
-
         let promisArr = []
-
         loadCategories().then(categories => {
             var ids = []
             categories.data.meals.map(cat => cat.strCategory)
@@ -56,27 +58,17 @@ function loadIds() {
                 resolve(ids)
             })
         })
-
-
-        // let idsPromisArr = categories.map(categoryName => loadMealsFromCategory(categoryName))
-        // Promise.all(idsPromisArr).then(data => data.forEach(mealsOfCat => {
-        //     mealsOfCat.data.forEach(meal => result.push(mealId))
-        //     resolve(result)
-        // }))
-        
     })
-    // .then(data => data.data.meals.map(cat => load))
-    // // let catRes = await loadCategories()
-    // // catRes.data.meals.map(cat => loadMealsFromCategory(cat.strCategory))
-    // Promise.all(categoryPromises).then(data => console.log("all", data)).catch(e => console.log("Error loading all ids:", e))
 }
 
-loadIds().then(ids => console.log(ids))
+// loadIds().then(ids => console.log(ids))
 
 // returns promise for elastic api answer
 function sendToElastic(meal) {
-    return axios.put(`${config.elasticUrl}${meal.strCategory}/${meal.idMeal}`, meal)
+    return axios.put(`${config.elasticUrl}${meal.category}/${meal.id}`, meal)
 }
+
+loadMealFromId('52772').then(data => console.log("recipe", sendToElastic(transformMeal(data.data.meals[0])).then((data, err) => console.log(data, err))))
 
 function execute() {
     var promiseArr = []
