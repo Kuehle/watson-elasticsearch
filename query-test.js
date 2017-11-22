@@ -19,4 +19,22 @@ function search(searchObj) {
 // sample query for category search
 // https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#api-search
 // extended body searches https://www.elastic.co/guide/en/elasticsearch/reference/6.0/search-request-body.html 
-search({"q" : "category:beef", "size": "2", "sort": "name:-1,area:1"}).then(results => console.log("Category Beef:", results))
+
+// search({"q" : "category:beef", "size": "2", "sort": "name:-1,area:1"}).then(results => console.log("Category Beef:", results))
+
+console.log("________________________________")
+// more complicated with DSL - Domainspecific Language
+https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-bool-query.html
+search({body: {
+        "query": {
+            "bool": {
+                "must": {
+                    "match": {"name": "Chicken"}
+                },
+                "must_not": {
+                    "match": {"area": ["Japanese", "Mexican"]}
+                }
+            }
+        }
+    }}
+    ).then(data => console.log("DSL Query for chicken in body", data))
