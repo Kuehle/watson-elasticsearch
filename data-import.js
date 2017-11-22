@@ -22,15 +22,19 @@ function loadMealsFromCategory(category) {
 }
 
 function transformMeal(meal) {
+    let ingredients = []
+    let ingredientNameKeys = Object.keys(meal).filter(key => key.match(/ingredient/i))
+    let ingredientMeasureKeys = Object.keys(meal).filter(key => key.match(/measure/i))
+    
+    ingredientNameKeys.forEach((key, index) => ingredients.push({name: meal[key], measure: meal[ingredientMeasureKeys[index]]}))
+
     return {
         // gets Added in elastic id: ,
         name: meal.strMeal, 
         category: meal.strCategory, 
         area: meal.strArea, 
         instructions: meal.strInstructions, 
-        ingredients: [
-            {name: "Ingridient 1", quantity: "1/2 teaspoon"}
-        ], 
+        ingredients: ingredients.filter(ingredient => ingredient.name), 
         imgUrl: meal.strMealThumb,
         videoUrl: undefined 
     }
