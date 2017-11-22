@@ -8,7 +8,7 @@ let config = {
     apiUrl: 'http://www.themealdb.com/api/json/v1/',
     apiKey: process.env.KEY || '1',
     url: () => `${config.apiUrl}${config.apiKey}`,
-    elasticUrl: 'http:localhost:'
+    elasticUrl: 'http://localhost:9200/'
 }
 
 // returns promise with all Categories in data property
@@ -40,9 +40,45 @@ function transformMeal(meal) {
     }
 }
 
-async function loadData() {
-    let catRes = await loadCategories()
-    let categories = catRes.data.meals.map(cat => cat.strCategory)
+function loadIds() {
+    return new Promise((resolve, reject) => {
 
-    categories.forEach(cat => loadMealsFromCategory(cat).then(res => console.log('res.data', res.data.meals)))
+        let promisArr = []
+
+        loadCategories().then(categories => {
+            var ids = []
+            categories.data.meals.map(cat => cat.strCategory)
+                .forEach(categoryName => {
+                    promisArr.push(loadMealsFromCategory(categoryName))
+                })
+            Promise.all(promisArr).then(all => {
+                all.forEach(categoryPromise => categoryPromise.data.meals.forEach(meal => ids.push(meal.idMeal)))
+                resolve(ids)
+            })
+        })
+
+
+        // let idsPromisArr = categories.map(categoryName => loadMealsFromCategory(categoryName))
+        // Promise.all(idsPromisArr).then(data => data.forEach(mealsOfCat => {
+        //     mealsOfCat.data.forEach(meal => result.push(mealId))
+        //     resolve(result)
+        // }))
+        
+    })
+    // .then(data => data.data.meals.map(cat => load))
+    // // let catRes = await loadCategories()
+    // // catRes.data.meals.map(cat => loadMealsFromCategory(cat.strCategory))
+    // Promise.all(categoryPromises).then(data => console.log("all", data)).catch(e => console.log("Error loading all ids:", e))
+}
+
+loadIds().then(ids => console.log(ids))
+
+// returns promise for elastic api answer
+function sendToElastic(meal) {
+    return axios.put(`${config.elasticUrl}${meal.strCategory}/${meal.idMeal}`, meal)
+}
+
+function execute() {
+    var promiseArr = []
+
 }
