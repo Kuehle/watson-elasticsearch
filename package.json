@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Kuehle/watson-elasticsearch#readme",
   "dependencies": {
-    "axios": "^0.17.1"
+    "axios": "^0.17.1",
+    "elasticsearch": "^14.0.0"
   }
 }

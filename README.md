@@ -15,4 +15,6 @@ Prequesites: docker, docker-compose, node
 
 ```docker-compose up``` starts the Elasticsearch instances (avaliable on localhost:9200).
 
-```node data-import.js``` runs a series of queries against the popular open meal Database [TheMealDB](http://www.themealdb.com) and indexes all Data in your local elastic instances. 
+## Import Data
+```KEY=(your-api-key) node data-import.js``` runs a series of queries against the popular open meal Database [TheMealDB](http://www.themealdb.com) and indexes all Data in your local elastic instances. 
+
