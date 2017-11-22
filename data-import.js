@@ -8,7 +8,7 @@ let config = {
     apiUrl: 'http://www.themealdb.com/api/json/v1/',
     apiKey: process.env.KEY || '1',
     url: () => `${config.apiUrl}${config.apiKey}`,
-    elasticUrl: 'http://localhost:9200/meals/'
+    elasticUrl: 'http://localhost:9200/bot/meals/'
 }
 
 // returns promise with all Categories in data property
@@ -29,14 +29,15 @@ function transformMeal(meal) {
     ingredientNameKeys.forEach((key, index) => ingredients.push({name: meal[key], measure: meal[ingredientMeasureKeys[index]]}))
 
     return {
-        id: meal.idMeal,
+        mealId: meal.idMeal,
         name: meal.strMeal, 
         category: meal.strCategory, 
         area: meal.strArea, 
-        instructions: meal.strInstructions, 
+        instructions: meal.strInstructions.split('\r\n').join(' '), 
         ingredients: ingredients.filter(ingredient => ingredient.name), 
         imgUrl: meal.strMealThumb,
-        videoUrl: undefined 
+        videoUrl: meal.strYoutube,
+        srcUrl: meal.strSource
     }
 }
 
@@ -61,16 +62,25 @@ function loadIds() {
     })
 }
 
-// loadIds().then(ids => console.log(ids))
-
 // returns promise for elastic api answer
 function sendToElastic(meal) {
-    return axios.put(`${config.elasticUrl}${meal.category}/${meal.id}`, meal)
+    return axios.put(`${config.elasticUrl}${meal.mealId}`, meal)
 }
 
-loadMealFromId('52772').then(data => console.log("recipe", sendToElastic(transformMeal(data.data.meals[0])).then((data, err) => console.log(data, err))))
-
-function execute() {
-    var promiseArr = []
-
+function execute() {    
+    loadIds().then(ids => {
+        var promiseArr = ids.map(id => loadMealFromId(id))
+        Promise.all(promiseArr).then(data => {
+            console.log(promiseArr)    
+            // console.log("data 0", data[0].data.meals[0])
+            data.forEach(val => {
+                console.log(transformMeal(val.data.meals[0]))
+                sendToElastic(transformMeal(val.data.meals[0]))
+                    .then(d => console.log('ok'))
+                    .catch(e => console.log(e))
+            })
+        }).catch(e => console.log('Promise all error:', e))
+    })
 }
+// sendToElastic(JSON.parse('{"mealId":"82715","name":"French Lentils With Garlic and Thyme","category":"Fish","area":"French","instructions":"lalala","ingredients":[{"name":"Olive Oil","measure":"3 tablespoons"},{"name":"Onion","measure":"1"},{"name":"Garlic","measure":"2 cloves"},{"name":"Carrot","measure":"1"},{"name":"French Lentils","measure":"2 1/4 cups"},{"name":"Thyme","measure":"1 teaspoon"},{"name":"Bay Leaf","measure":"3"},{"name":"Salt","measure":"1 tablespoon"},{"name":"Celery","measure":"2 sticks"}],"imgUrl":"http://www.themealdb.com/images/media/meals/vwwspt1487394060.jpg","videoUrl":"none","srcUrl":""}'))
+execute()
