@@ -24,17 +24,57 @@ function search(searchObj) {
 
 console.log("________________________________")
 // more complicated with DSL - Domainspecific Language
-https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-bool-query.html
-search({body: {
+// https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-bool-query.html
+// search({body: {
+//         "query": {
+//             "bool": {
+//                 "must": {
+//                     "match": {"name": "Chicken"}
+//                 },
+//                 "must_not": {
+//                     "match": {"area": ["Japanese", "Mexican"]}
+//                 }
+//             }
+//         }
+//     }}
+// ).then(data => console.log("DSL Query for chicken in body", data))
+
+// {
+//     "query": { 
+//       "bool": { 
+//         "must": [
+//           { "match": { "title":   "Search"        }}, 
+//           { "match": { "content": "Elasticsearch" }}  
+//         ],
+//         "filter": [ 
+//           { "term":  { "status": "published" }}, 
+//           { "range": { "publish_date": { "gte": "2015-01-01" }}} 
+//         ]
+//       }
+//     }
+//   }
+
+// Fulltext query -> https://www.elastic.co/guide/en/elasticsearch/reference/current/full-text-queries.html
+
+// search({
+//     "body": {
+//         "aggs" : {
+//             "categorys" : {
+//                 "terms" : { "field" : "category" }
+//             }
+//         }
+//     }
+// }).then(data => console.log(data))
+
+search({
+    "body": { 
+        "_source": ["name", "category", "area"],
+        "from": 0,
+        "size": 2,
         "query": {
-            "bool": {
-                "must": {
-                    "match": {"name": "Chicken"}
-                },
-                "must_not": {
-                    "match": {"area": ["Japanese", "Mexican"]}
-                }
+            "match": {
+                "category": "Beef"
             }
         }
-    }}
-    ).then(data => console.log("DSL Query for chicken in body", data))
+    }
+}).then(data => console.log(data))
