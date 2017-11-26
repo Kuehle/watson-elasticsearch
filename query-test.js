@@ -113,13 +113,19 @@ search({
         "size": 1,
         "query": {
            "function_score": {
-              "functions": [
-                 {
-                    "random_score": {
-                       "seed": '' + Math.random()
+              
+                "functions": [
+                    {
+                        "random_score": {
+                        "seed": '' + Math.random()
+                        }
                     }
-                 }
-              ]
+                ],
+                "query": {
+                    "match": {
+                        "category": "beef"
+                    }
+                }
            }
         }
      }
