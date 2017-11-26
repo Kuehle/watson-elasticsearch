@@ -66,15 +66,42 @@ console.log("________________________________")
 //     }
 // }).then(data => console.log(data))
 
+// search({
+//     "body": { 
+//         "_source": ["name", "category", "area"],
+//         "from": 0,
+//         "size": 2,
+//         "query": {
+//             "match": {
+//                 "category": "Beef"
+//             }
+//         }
+//     }
+// }).then(data => console.log(data))
+
+// nested fields are matched with e.g. ingredients.name
+
 search({
     "body": { 
         "_source": ["name", "category", "area"],
-        "from": 0,
-        "size": 2,
         "query": {
             "match": {
-                "category": "Beef"
+                "ingredients.name": "garlic"
             }
-        }
+        },
+        "aggs":{
+            "dedup" : {
+              "terms":{
+                "field": "category"
+               },
+               "aggs":{
+                 "dedup_docs":{
+                   "top_hits":{
+                     "size":1
+                   }
+                 }
+               }    
+            }
+          }
     }
 }).then(data => console.log(data))
