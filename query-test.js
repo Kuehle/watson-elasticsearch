@@ -81,27 +81,46 @@ console.log("________________________________")
 
 // nested fields are matched with e.g. ingredients.name
 
+// search({
+//     "body": { 
+//         "_source": ["name", "category", "area"],
+//         "query": {
+//             "match": {
+//                 "ingredients.name": "garlic"
+//             }
+//         },
+//         "aggs":{
+//             "dedup" : {
+//               "terms":{
+//                 "field": "category"
+//                },
+//                "aggs":{
+//                  "dedup_docs":{
+//                    "top_hits":{
+//                      "size":1
+//                    }
+//                  }
+//                }    
+//             }
+//           }
+//     }
+// }).then(data => console.log(data))
+
 search({
-    "body": { 
-        "_source": ["name", "category", "area"],
+    index: 'bot',
+    type: 'meals',
+    body: {
+        "size": 1,
         "query": {
-            "match": {
-                "ingredients.name": "garlic"
-            }
-        },
-        "aggs":{
-            "dedup" : {
-              "terms":{
-                "field": "category"
-               },
-               "aggs":{
-                 "dedup_docs":{
-                   "top_hits":{
-                     "size":1
-                   }
+           "function_score": {
+              "functions": [
+                 {
+                    "random_score": {
+                       "seed": '' + Math.random()
+                    }
                  }
-               }    
-            }
-          }
-    }
-}).then(data => console.log(data))
+              ]
+           }
+        }
+     }
+}).then(data => console.log(data)) 
